@@ -1,43 +1,61 @@
-import React, {useState, ChangeEvent, FormEvent} from 'react';
+// LoginForm.js
+import React, {ChangeEvent, useState} from "react";
 import {
     ButtonContainer,
     CenteredForm,
     StyledInput,
     Button,
     UnderlineTypography,
-    TitleTypography
+    TitleTypography,
 } from "./LoginForm.styles";
+import {useRouter} from "next/router";
+
 
 export default function LoginForm() {
+    const [apiKey, setApiKey] = useState("");
+    const router = useRouter();
 
-    const [apiKey, setApiKey] = useState('');
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault();
+        const _result = await fetch("/api/key", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                apiKey: apiKey,
+            }),
+        });
 
-        // API Key를 로컬 스토리지에 저장
-        localStorage.setItem('openai_api_key', apiKey);
-
-        // API Key 유효성 검사 및 로그인 페이지로 이동
-        // TODO: API Key 유효성 검사 후 결과에 따라 처리
-        window.location.href = '/LoginForm';
+        const _data = await _result.json();
+        if (_data.result === "success") {
+            console.log("success");
+            sessionStorage.setItem("apiKey", apiKey);
+            // handleFetchApi();
+            router.push("/lobby");
+        } else {
+            console.log("fail");
+        }
     };
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         setApiKey(event.target.value);
     };
 
+    const generateKey = () => {
+        window.open("https://platform.openai.com/account/api-keys");
+    };
+
     return (
         <CenteredForm onSubmit={handleSubmit}>
             <img src={"chat_logo.png"} alt="Chat Logo" width={100}/>
             <TitleTypography>API KEY</TitleTypography>
-            <StyledInput
-                type="text"
-                value={apiKey}
-                onChange={handleInputChange}
-            />
+            <StyledInput type="text" value={apiKey} onChange={handleInputChange}/>
             <ButtonContainer>
                 <Button type="submit">Login</Button>
-                <UnderlineTypography>KEY 발급받는 방법</UnderlineTypography>
+                <UnderlineTypography onClick={generateKey}>
+                    KEY 발급받는 방법
+                </UnderlineTypography>
             </ButtonContainer>
         </CenteredForm>
     );

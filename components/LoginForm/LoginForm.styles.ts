@@ -78,6 +78,7 @@ const UnderlineTypography = styled.span`
   display: inline-block;
   margin: 2rem;
   color: #ffffff;
+  cursor:pointer;
 
   &:after {
     content: '';
