@@ -5,15 +5,18 @@ export interface ChatRoom {
   id?: number;
   name: string;
   maxMembers: number;
+  createdAt?: Date;
+  messages?: Message[];
 }
 
 export interface Message {
   id?: number;
-  roomId: number;
   sender: string;
   content: string;
   timestamp: Date;
+  image: string;
 }
+
 
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -81,19 +84,36 @@ export async function updateChatRoom(room: ChatRoom): Promise<void> {
   });
 }
 
-export async function getChatRoomById(id: number): Promise<ChatRoom | undefined> {
+export async function getOrCreateChatRoomById(id: number): Promise<ChatRoom> {
   const db = await openDB();
-  const transaction = db.transaction("chatRooms", "readonly");
+  const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
-
+  console.log(id);
   const request = store.get(id);
 
   return new Promise((resolve, reject) => {
     request.onsuccess = (e: Event) => {
-      resolve((e.target as IDBRequest).result);
+      const result = (e.target as IDBRequest).result;
+      if (result) {
+        resolve(result);
+      } else {
+        const newRoom: ChatRoom = {
+          name: "My New Room",
+          maxMembers: 100,
+          createdAt: new Date(),
+          messages: [],
+        };
+        const addRequest = store.add(newRoom);
+        addRequest.onsuccess = () => {
+          resolve(newRoom);
+        };
+        addRequest.onerror = (e) => {
+          reject((e.target as IDBRequest).error);
+        };
+      }
     };
 
-    request.onerror = (e: Event) => {
+    request.onerror = (e) => {
       reject((e.target as IDBRequest).error);
     };
   });
@@ -116,7 +136,6 @@ export async function deleteChatRoom(id: number): Promise<void> {
     };
   });
 }
-
 
 
 async function saveChatRoom(room: ChatRoom): Promise<number> {
@@ -170,4 +189,62 @@ async function getAllChatRooms(): Promise<ChatRoom[]> {
   });
 }
 
-export { saveChatRoom, saveMessage, openDB, getAllChatRooms };
+async function addMessage(roomId: number, message: Omit<Message, "id"> & { name: string }): Promise<number> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readwrite");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.get(roomId);
+
+  return new Promise(async (resolve, reject) => {
+    request.onsuccess = (e: Event) => {
+      const room = (e.target as IDBRequest).result as ChatRoom | undefined;
+      if (room) {
+        const messages = room.messages || [];
+        const newMessage = {
+          ...message,
+          id: Date.now(),
+          timestamp: new Date(),
+        };
+        messages.push(newMessage);
+        room.messages = messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        const putRequest = store.put(room);
+        putRequest.onsuccess = (e: Event) => {
+          resolve(newMessage.id);
+        };
+        putRequest.onerror = (e: Event) => {
+          reject((e.target as IDBRequest).error);
+        };
+      } else {
+        reject(new Error(`Room ${roomId} not found`));
+      }
+    };
+  });
+}
+
+async function getMessages(roomId: number): Promise<Message[]> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readonly");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.get(roomId);
+
+  return new Promise(async (resolve, reject) => {
+    request.onsuccess = (e: Event) => {
+      const room = (e.target as IDBRequest).result as ChatRoom | undefined;
+      if (room) {
+        const messages = room.messages || [];
+        const sortedMessages = messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        resolve(sortedMessages);
+      } else {
+        reject(new Error(`Room ${roomId} not found`));
+      }
+    };
+    request.onerror = (e: Event) => {
+      reject((e.target as IDBRequest).error);
+    };
+  });
+}
+
+
+export { saveChatRoom, saveMessage, addMessage, getMessages, openDB, getAllChatRooms };

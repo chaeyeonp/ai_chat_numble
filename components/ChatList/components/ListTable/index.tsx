@@ -6,8 +6,15 @@ import {
 import { ChatRoom } from "../../../../database/Data";
 import { useState } from "react";
 import EditChatRoomDialog from "../EditChatRoomDialog";
+import { useRouter } from "next/router";
 
-const ListTable = (props: { chatRooms: ChatRoom[] , changeData:()=>void}) => {
+const ListTable = (props: { chatRooms: ChatRoom[], changeData: () => void }) => {
+  const router = useRouter();
+
+  const handleRowClick = (id: number) => {
+    router.push(`/chatroom/${id}`);
+  };
+
   const { chatRooms, changeData } = props;
   const [edit, setEdit] = useState<{ open: boolean, value: ChatRoom | undefined }>({
     open: false,
@@ -26,7 +33,8 @@ const ListTable = (props: { chatRooms: ChatRoom[] , changeData:()=>void}) => {
         </thead>
         <tbody>
         {chatRooms.map(chatRoom => (
-          <tr key={chatRoom.id}>
+          <tr key={chatRoom.id}
+              onClick={() => chatRoom.id && handleRowClick(chatRoom.id)}>
             <td>{chatRoom.name}</td>
             <td>
               <ModifyButton onClick={() => {
@@ -40,7 +48,7 @@ const ListTable = (props: { chatRooms: ChatRoom[] , changeData:()=>void}) => {
       {edit.open &&
         <EditChatRoomDialog onClose={() => {
           setEdit({ open: false, value: undefined });
-        }} room={edit.value} changeData={changeData}/>
+        }} room={edit.value} changeData={changeData} />
       }
     </>
 
