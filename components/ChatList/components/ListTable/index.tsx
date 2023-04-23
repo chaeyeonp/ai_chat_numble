@@ -37,9 +37,11 @@ const ListTable = (props: { chatRooms: ChatRoom[], changeData: () => void }) => 
               onClick={() => chatRoom.id && handleRowClick(chatRoom.id)}>
             <td>{chatRoom.name}</td>
             <td>
-              <ModifyButton onClick={() => {
+              <ModifyButton onClick={(event) => {
+                event.stopPropagation();
                 setEdit({ open: true, value: chatRoom });
               }}>수정</ModifyButton>
+
             </td>
           </tr>
         ))}
