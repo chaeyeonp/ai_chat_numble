@@ -1,0 +1,155 @@
+const dbName = "chatDB";
+const dbVersion = 1;
+
+export interface ChatRoom {
+  id?: number;
+  name: string;
+  maxMembers: number;
+}
+
+export interface Message {
+  id?: number;
+  roomId: number;
+  sender: string;
+  content: string;
+  timestamp: Date;
+}
+
+async function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName, dbVersion);
+
+    request.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+      const db = (e.target as IDBOpenDBRequest).result;
+
+      const ChatRooms = db.createObjectStore("chatRooms", {
+        keyPath: "id",
+      });
+
+      ChatRooms.createIndex("id", "id", { unique: true });
+      ChatRooms.createIndex("name", "name", { unique: true });
+
+      const Messages = db.createObjectStore("messages", {
+        keyPath: "id",
+      });
+      Messages.createIndex("id", "id", { unique: true });
+      Messages.createIndex("roomId", "roomId", { unique: false });
+    };
+
+    request.onsuccess = (e: Event) =>
+      resolve((e.target as IDBOpenDBRequest).result);
+    request.onerror = (e: Event) =>
+      reject((e.target as IDBOpenDBRequest).error);
+  });
+}
+
+export async function createChatRoom(room: Omit<ChatRoom, "id">) {
+  console.log("hello");
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readwrite");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.add(room);
+  console.log(db);
+
+  return new Promise((resolve, reject) => {
+    console.log(resolve, reject);
+    request.onsuccess = (e: Event) => {
+      resolve((e.target as IDBRequest).result);
+    };
+
+    request.onerror = (e: Event) => {
+      reject((e.target as IDBRequest).error);
+    };
+  });
+}
+
+export async function updateChatRoom(room: ChatRoom): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readwrite");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.put(room);
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      resolve();
+    };
+    request.onerror = () => {
+      reject();
+    };
+  });
+}
+
+export async function getChatRoomById(id: number): Promise<ChatRoom | undefined> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readonly");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.get(id);
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = (e: Event) => {
+      resolve((e.target as IDBRequest).result);
+    };
+
+    request.onerror = (e: Event) => {
+      reject((e.target as IDBRequest).error);
+    };
+  });
+}
+
+
+
+async function saveChatRoom(room: ChatRoom): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    const db = await openDB();
+    const transaction = db.transaction("chatRooms", "readwrite");
+    const store = transaction.objectStore("chatRooms");
+
+    const request = store.add(room);
+
+    request.onsuccess = (e: Event) =>
+      resolve((e.target as IDBRequest).result as number);
+    request.onerror = (e: Event) => reject((e.target as IDBRequest).error);
+
+    db.close();
+  });
+}
+
+async function saveMessage(message: Message): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    const db = await openDB();
+    const transaction = db.transaction("messages", "readwrite");
+    const store = transaction.objectStore("messages");
+
+    const request = store.add(message);
+
+    request.onsuccess = (e: Event) =>
+      resolve((e.target as IDBRequest).result as number);
+    request.onerror = (e: Event) => reject((e.target as IDBRequest).error);
+
+    db.close();
+  });
+}
+
+// 채팅방 전체 목록 불러오기 함수
+async function getAllChatRooms(): Promise<ChatRoom[]> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readonly");
+  const store = transaction.objectStore("chatRooms");
+
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+
+    request.onsuccess = (e: Event) => {
+      resolve((e.target as IDBRequest).result);
+    };
+
+    request.onerror = (e: Event) => {
+      reject((e.target as IDBRequest).error);
+    };
+  });
+}
+
+export { saveChatRoom, saveMessage, openDB, getAllChatRooms };

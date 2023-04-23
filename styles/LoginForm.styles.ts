@@ -6,11 +6,10 @@ const ButtonContainer = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  
+
   position: absolute;
   bottom: 0;
 `;
-
 
 const Button = styled.button`
   display: flex;
@@ -20,7 +19,7 @@ const Button = styled.button`
   height: 50px;
   border: none;
   border-radius: 5px;
-  background: #26D9FD;
+  background: #26d9fd;
   color: #000000;
   font-weight: 700;
   font-size: 20px;
@@ -46,6 +45,10 @@ const CenteredForm = styled.form`
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  justify-content: center;
+  height: 90vh;
+  background-color: #000000;
+  margin: 0;
 
   h1 {
     font-size: 1.1rem;
@@ -69,19 +72,26 @@ const TitleTypography = styled.h1`
   display: flex;
   justify-content: center;
   align-items: center;
-  color:#ffffff;
-`
+  color: #ffffff;
+`;
 
+const ErrorTypography = styled.h1`
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ff0000;
+`;
 
 const UnderlineTypography = styled.span`
   position: relative;
   display: inline-block;
   margin: 2rem;
   color: #ffffff;
-  cursor:pointer;
+  cursor: pointer;
 
   &:after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
@@ -91,5 +101,13 @@ const UnderlineTypography = styled.span`
   }
 `;
 
-
-export {ButtonContainer, Button, CenteredContainer, CenteredForm, StyledInput, TitleTypography,UnderlineTypography}
+export {
+  ButtonContainer,
+  Button,
+  CenteredContainer,
+  CenteredForm,
+  StyledInput,
+  TitleTypography,
+  ErrorTypography,
+  UnderlineTypography,
+};
