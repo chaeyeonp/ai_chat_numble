@@ -142,7 +142,7 @@ export const Label = styled.label`
 
 export const Input = styled.input`
   display: block;
-  width: 100%;
+  width: 80vw;
   padding: 8px 12px;
   margin-bottom: 16px;
   border: 1px solid #ccc;
@@ -151,3 +151,10 @@ export const Input = styled.input`
 `;
 
 
+export const StyledDialogTitle = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #f5f5f5;
+`;

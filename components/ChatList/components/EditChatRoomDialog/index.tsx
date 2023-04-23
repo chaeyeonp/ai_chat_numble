@@ -2,18 +2,19 @@
 import { useState } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import { ChatRoom, updateChatRoom } from "../../../../database/Data";
-import { Input, Label } from "../../../../styles/ChatList.styles";
+import { ChatRoom, deleteChatRoom, updateChatRoom } from "../../../../database/Data";
+import { Input, Label, StyledDialogTitle } from "../../../../styles/ChatList.styles";
+import CloseIcon from "../../../../public/icons/CloseIcon";
+import { Typography } from "@mui/material";
 
 const EditChatRoomDialog = ({
                               onClose = () => {
                               },
                               changeData = () => {
                               },
-                              room = { id: 1, name: "", maxMembers: 2 },
+                              room,
                             }: { onClose: () => void; changeData: () => void; room?: ChatRoom | undefined }) => {
   const [state, setState] = useState({
     name: room?.name || "",
@@ -39,9 +40,21 @@ const EditChatRoomDialog = ({
     }
   };
 
+
+  const handleDeleteChatRoom = async (id: number) => {
+    await deleteChatRoom(id);
+    changeData();
+    onClose();
+  };
+
+  if (!room) return <div></div>;
+
   return (
     <Dialog open={true} onClose={onClose}>
-      <DialogTitle>Edit Room</DialogTitle>
+      <StyledDialogTitle>
+        <Typography>Edit Page</Typography>
+        <Button onClick={onClose}><CloseIcon width={40} height={40} />
+        </Button></StyledDialogTitle>
       <DialogContent>
         <Label>
           방 이름
@@ -67,7 +80,13 @@ const EditChatRoomDialog = ({
         </Label>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={() => {
+          if(room.id){
+            handleDeleteChatRoom(room.id);
+
+          }
+        }
+        }>Delete</Button>
         <Button onClick={handleUpdateRoom}>Edit</Button>
       </DialogActions>
     </Dialog>

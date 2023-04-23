@@ -100,6 +100,24 @@ export async function getChatRoomById(id: number): Promise<ChatRoom | undefined>
 }
 
 
+export async function deleteChatRoom(id: number): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction("chatRooms", "readwrite");
+  const store = transaction.objectStore("chatRooms");
+
+  const request = store.delete(id);
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      resolve();
+    };
+    request.onerror = () => {
+      reject();
+    };
+  });
+}
+
+
 
 async function saveChatRoom(room: ChatRoom): Promise<number> {
   return new Promise(async (resolve, reject) => {

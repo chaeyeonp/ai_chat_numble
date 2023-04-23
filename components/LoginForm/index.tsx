@@ -1,4 +1,3 @@
-import Image from "next/image";
 import React, { ChangeEvent, useState } from "react";
 import {
   ButtonContainer,
@@ -52,7 +51,7 @@ export default function LoginForm() {
 
   return (
     <CenteredForm>
-      <Image src={"images/chat_logo.png"} alt="Chat Logo" width={100} />
+      <img src={"images/chat_logo.png"} alt="Chat Logo" width={100} />
       <TitleTypography>API KEY</TitleTypography>
       <StyledInput type="text" value={apiKey} onChange={handleInputChange} />
       <ErrorTypography>{error}</ErrorTypography>
