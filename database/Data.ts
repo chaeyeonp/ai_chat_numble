@@ -47,16 +47,13 @@ async function openDB(): Promise<IDBDatabase> {
 }
 
 export async function createChatRoom(room: Omit<ChatRoom, "id">) {
-  console.log("hello");
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
 
-  const request = store.add(room);
-  console.log(db);
+  const request = store.add({ ...room, id: Date.now() });
 
   return new Promise((resolve, reject) => {
-    console.log(resolve, reject);
     request.onsuccess = (e: Event) => {
       resolve((e.target as IDBRequest).result);
     };
