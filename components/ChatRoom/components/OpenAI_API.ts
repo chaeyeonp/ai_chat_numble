@@ -1,5 +1,4 @@
-const API_URL = "https://api.openai.com/v1/engines/davinci-codex/completions";
-
+const API_URL = "https://api.openai.com/v1/chat/completions";
 export async function OpenAI_API(prompt: any) {
   const response = await fetch(API_URL, {
     method: "POST",
@@ -13,6 +12,14 @@ export async function OpenAI_API(prompt: any) {
       n: 1,
       stop: null,
       temperature: 1,
+      model:"gpt-3.5-turbo",
+      messages: [{"role": "user", "content": "Hello!"}],
+      error: {
+        message: "Invalid request. Please check your input.",
+        type: "invalid_request_error",
+        messages: ["The 'stop' parameter must be a non-empty string or null."]
+      }
+
     }),
   });
 

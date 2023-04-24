@@ -33,7 +33,7 @@ const ChatRooms = () => {
   const onCreate = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      await createChatRoom({ name: roomName, maxMembers: maxMembers });
+      await createChatRoom({ name: roomName, maxMembers: maxMembers, messages: [] });
       changeData();
       setShowCreate(false);
     } catch (error) {

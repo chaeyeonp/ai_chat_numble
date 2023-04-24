@@ -19,6 +19,7 @@ const EditChatRoomDialog = ({
   const [state, setState] = useState({
     name: room?.name || "",
     maxMembers: room?.maxMembers || 2,
+    message:[]
   });
 
 
@@ -30,7 +31,7 @@ const EditChatRoomDialog = ({
   };
 
   const handleUpdateRoom = async () => {
-    const updatedRoom = { ...room, ...state };
+    const updatedRoom = { ...room, ...state, };
     try {
       await updateChatRoom(updatedRoom);
       changeData();

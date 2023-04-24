@@ -1,29 +1,81 @@
-import React, { useState } from "react";
+import React from "react";
+import styled from "@emotion/styled";
+
+const InputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 90%;
+  padding: 1rem;
+`;
+
+const Input = styled.input`
+  flex-grow: 1;
+  height: 2rem;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  background-color: #f5f5f5;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px #3a90f2;
+  }
+`;
+
+const SendButton = styled.button`
+  background-color: #3a90f2;
+  color: #fff;
+  padding:1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #3a90f2;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px #3a90f2;
+  }
+`;
 
 export function ChatInput(props: { onSendMessage: any }) {
-  const { onSendMessage } = props;
-  const [inputValue, setInputValue] = useState("");
+  const [text, setText] = React.useState("");
 
-  const handleInputChange = (e: any) => {
-    setInputValue(e.target.value);
+  const handleTextChange = (event: any) => {
+    setText(event.target.value);
   };
 
+  const handleSendClick = () => {
+    if (text.trim()) {
+      props.onSendMessage(text);
+      setText("");
+    }
+  };
 
-  const handleSubmit = () => {
-    if (inputValue.trim()) {
-      onSendMessage(inputValue.trim());
-      setInputValue("");
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      handleSendClick();
     }
   };
 
   return (
-    <div className="chat-input-container">
-      <input
+    <InputContainer>
+      <Input
         type="text"
-        value={inputValue}
-        onChange={handleInputChange}
+        placeholder="메시지를 입력하세요..."
+        value={text}
+        onChange={handleTextChange}
+        onKeyDown={handleKeyDown}
       />
-      <button onClick={handleSubmit}>Send</button>
-    </div>
+      <SendButton onClick={handleSendClick}>보내기</SendButton>
+    </InputContainer>
   );
 }

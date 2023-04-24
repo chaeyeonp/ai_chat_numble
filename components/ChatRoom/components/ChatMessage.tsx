@@ -1,4 +1,35 @@
 import React from "react";
+import styled from "@emotion/styled";
+
+const MessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+  padding: 1rem;
+`;
+
+const Sender = styled.div`
+  font-weight: bold;
+`;
+
+const Text = styled.div``;
+
+const Timestamp = styled.div`
+  margin-left: 0.5rem;
+  color: #999;
+`;
+
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+`;
+
+const CurrentUserMessageContainer = styled(MessageContainer)`
+  flex-direction: row-reverse;
+`;
 
 export function ChatMessage(props: { message: any, isCurrentUser: any }) {
   const { message, isCurrentUser } = props;
@@ -8,16 +39,16 @@ export function ChatMessage(props: { message: any, isCurrentUser: any }) {
     return `${hours}:${minutes}`;
   };
 
+  const Container = isCurrentUser ? CurrentUserMessageContainer : MessageContainer;
+
   return (
-    <div className={`message ${isCurrentUser ? "current-user" : "other-user"}`}>
-      <img src={`/images/${message.image}`} alt={message.name} />
+    <Container>
+      <ProfileImage src={`/images/profile/${message.image}`} alt={message.name} />
       <div className="message-info">
-        <div className="message-sender">{message.name}</div>
-        <div className="message-text">{message.text}</div>
-        <div className="message-timestamp">
-          {formatTimestamp(message.timestamp)}
-        </div>
+        <Sender>{message.name}</Sender>
+        <Text>{message.content}</Text>
+        <Timestamp>{formatTimestamp(message.timestamp)}</Timestamp>
       </div>
-    </div>
+    </Container>
   );
 }

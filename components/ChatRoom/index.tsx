@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { nicknames, profileImages } from "./utils/profileData";
 import OpenAI_API from "./components/OpenAI_API";
-import { addMessage, Message, ChatRoom as ChatRoomType, getOrCreateChatRoomById } from "../../database/Data";
+import { addMessage, ChatRoom as ChatRoomType, getOrCreateChatRoomById } from "../../database/Data";
 import styled from "@emotion/styled";
 import { ChatMessage } from "./components/ChatMessage";
 import { ChatInput } from "./components/ChatInput";
@@ -38,7 +38,6 @@ const RoomNotFound = styled.div`
 export const ChatRoom: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [messages, setMessages] = useState<Message[]>([]);
   const [currentUser, setCurrentUser] = useState({
     image: "",
     name: "",
@@ -52,10 +51,6 @@ export const ChatRoom: React.FC = () => {
   const [room, setRoom] = useState<ChatRoomType | undefined>();
 
   useEffect(() => {
-    setCurrentUser({
-      image: getRandomElement(profileImages),
-      name: getRandomElement(nicknames),
-    });
 
     setAIUser({
       image: getRandomElement(profileImages),
@@ -65,10 +60,15 @@ export const ChatRoom: React.FC = () => {
     const fetchRoom = async () => {
       if (id) {
         const fetchedRoom = await getOrCreateChatRoomById(parseInt(id as string));
-        if (fetchedRoom) {
 
+        if (fetchedRoom) {
           console.log(fetchedRoom);
           setRoom(fetchedRoom);
+          setCurrentUser({
+            image: "default_user.png",
+            name: fetchedRoom.name,
+          });
+
           setInRoom(true);
         } else {
           setInRoom(false);
@@ -120,7 +120,7 @@ export const ChatRoom: React.FC = () => {
   return room ? (
     <ChatContainer>
       <MessagesContainer>
-        {messages.map((message, index) => (
+        {room.messages.map((message, index) => (
           <ChatMessage
             key={index}
             message={message}

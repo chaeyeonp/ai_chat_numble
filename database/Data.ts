@@ -6,7 +6,7 @@ export interface ChatRoom {
   name: string;
   maxMembers: number;
   createdAt?: Date;
-  messages?: Message[];
+  messages: Message[];
 }
 
 export interface Message {
@@ -64,7 +64,7 @@ export async function createChatRoom(room: Omit<ChatRoom, "id">) {
   });
 }
 
-export async function updateChatRoom(room: ChatRoom): Promise<void> {
+export async function updateChatRoom(room: { maxMembers: number; name: string; message: any[] }): Promise<void> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -91,6 +91,9 @@ export async function getOrCreateChatRoomById(id: number): Promise<ChatRoom> {
     request.onsuccess = (e: Event) => {
       const result = (e.target as IDBRequest).result;
       if (result) {
+        if (!result.messages) {
+          result.messages = [];
+        }
         resolve(result);
       } else {
         const newRoom: ChatRoom = {
