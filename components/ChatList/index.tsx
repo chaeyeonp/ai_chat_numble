@@ -35,6 +35,7 @@ const ChatRooms = () => {
     try {
       await createChatRoom({ name: roomName, maxMembers: maxMembers });
       changeData();
+      setShowCreate(false);
     } catch (error) {
       console.error("Error in create chat room:", error);
     }
@@ -96,7 +97,7 @@ const ChatRooms = () => {
         </CenteredForm>
       ) : (
         <Content>
-          <ListTable chatRooms={chatRooms} changeData={changeData}/>
+          <ListTable chatRooms={chatRooms} changeData={changeData} />
         </Content>
       )}
       <Footer>
