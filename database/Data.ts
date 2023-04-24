@@ -85,7 +85,6 @@ export async function getOrCreateChatRoomById(id: number): Promise<ChatRoom> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
-  console.log(id);
   const request = store.get(id);
 
   return new Promise((resolve, reject) => {

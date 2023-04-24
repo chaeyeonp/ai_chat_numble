@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 const ListTable = (props: { chatRooms: ChatRoom[], changeData: () => void }) => {
   const router = useRouter();
 
+
   const handleRowClick = (id: number) => {
     router.push(`/chatroom/${id}`);
   };

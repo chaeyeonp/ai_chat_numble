@@ -5,16 +5,14 @@ import { addMessage, Message, ChatRoom as ChatRoomType, getOrCreateChatRoomById 
 import styled from "@emotion/styled";
 import { ChatMessage } from "./components/ChatMessage";
 import { ChatInput } from "./components/ChatInput";
-
-interface Props {
-  roomId: number;
-}
+import { useRouter } from "next/router";
 
 function getRandomElement(array: any[]): any {
   return array[Math.floor(Math.random() * array.length)];
 }
 
 const ChatContainer = styled.div`
+  color: white;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -30,13 +28,16 @@ const MessagesContainer = styled.div`
 `;
 
 const RoomNotFound = styled.div`
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
 `;
 
-export const ChatRoom: React.FC<Props> = ({ roomId }) => {
+export const ChatRoom: React.FC = () => {
+  const router = useRouter();
+  const { id } = router.query;
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentUser, setCurrentUser] = useState({
     image: "",
@@ -62,9 +63,11 @@ export const ChatRoom: React.FC<Props> = ({ roomId }) => {
     });
 
     const fetchRoom = async () => {
-      if(roomId){
-        const fetchedRoom = await getOrCreateChatRoomById(roomId);
+      if (id) {
+        const fetchedRoom = await getOrCreateChatRoomById(parseInt(id as string));
         if (fetchedRoom) {
+
+          console.log(fetchedRoom);
           setRoom(fetchedRoom);
           setInRoom(true);
         } else {
@@ -79,7 +82,7 @@ export const ChatRoom: React.FC<Props> = ({ roomId }) => {
       // 채팅방에서 나갈 때 필요한 작업 수행
       setInRoom(false);
     };
-  }, [roomId]);
+  }, [id]);
 
 
   const onSendMessage = async (text: string) => {
@@ -87,7 +90,7 @@ export const ChatRoom: React.FC<Props> = ({ roomId }) => {
       const aiResponse = await OpenAI_API(text);
       if (aiResponse && inRoom) {
         // 채팅방에 있을 때만 AI가 응답
-        addMessage(Number(roomId), {
+        addMessage(Number(id), {
           content: aiResponse,
           sender: "ai",
           image: aiUser.image,
@@ -104,7 +107,7 @@ export const ChatRoom: React.FC<Props> = ({ roomId }) => {
       setInRoom(false);
     }
 
-    addMessage(Number(roomId), {
+    addMessage(Number(id), {
       content: text,
       sender: "user",
       image: currentUser.image,
