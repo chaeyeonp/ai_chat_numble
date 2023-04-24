@@ -30,7 +30,7 @@ async function openDB(): Promise<IDBDatabase> {
       });
 
       ChatRooms.createIndex("id", "id", { unique: true });
-      ChatRooms.createIndex("name", "name", { unique: true });
+      ChatRooms.createIndex("name", "name", { unique: false });
 
       const Messages = db.createObjectStore("messages", {
         keyPath: "id",
