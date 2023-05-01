@@ -33,7 +33,11 @@ const ChatRooms = () => {
   const onCreate = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      await createChatRoom({ name: roomName, maxMembers: maxMembers, messages: [] });
+      await createChatRoom({
+        name: roomName,
+        maxMembers: maxMembers,
+        messages: [],
+      });
       changeData();
       setShowCreate(false);
     } catch (error) {
@@ -41,12 +45,11 @@ const ChatRooms = () => {
     }
   };
 
-
   useEffect(() => {
     const fetchData = async () => {
       const rooms = await getAllChatRooms();
       if (rooms) {
-        setChatRooms(rooms);
+        setChatRooms(rooms as ChatRoom[]);
       } else {
         setShowCreate(true);
       }
@@ -84,7 +87,7 @@ const ChatRooms = () => {
             min={2}
             max={10}
             value={roomName}
-            onChange={(e) => setRoomName(e.target.value)}
+            onChange={e => setRoomName(e.target.value)}
           />
           <TitleTypography>방 인원</TitleTypography>
           <StyledInput
@@ -92,7 +95,7 @@ const ChatRooms = () => {
             min={2}
             max={5}
             value={maxMembers}
-            onChange={(e) => setMaxMembers(parseInt(e.target.value))}
+            onChange={e => setMaxMembers(parseInt(e.target.value))}
           />
         </CenteredForm>
       ) : (

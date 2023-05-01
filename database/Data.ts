@@ -17,8 +17,7 @@ export interface Message {
   image: string;
 }
 
-
-async function openDB(): Promise<IDBDatabase> {
+async function openDB(): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, dbVersion);
 
@@ -64,7 +63,11 @@ export async function createChatRoom(room: Omit<ChatRoom, "id">) {
   });
 }
 
-export async function updateChatRoom(room: { maxMembers: number; name: string; message: any[] }): Promise<void> {
+export async function updateChatRoom(room: {
+  maxMembers: number;
+  name: string;
+  message: any[];
+}): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -81,7 +84,7 @@ export async function updateChatRoom(room: { maxMembers: number; name: string; m
   });
 }
 
-export async function getOrCreateChatRoomById(id: number): Promise<ChatRoom> {
+export async function getOrCreateChatRoomById(id: number): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -106,20 +109,19 @@ export async function getOrCreateChatRoomById(id: number): Promise<ChatRoom> {
         addRequest.onsuccess = () => {
           resolve(newRoom);
         };
-        addRequest.onerror = (e) => {
+        addRequest.onerror = e => {
           reject((e.target as IDBRequest).error);
         };
       }
     };
 
-    request.onerror = (e) => {
+    request.onerror = e => {
       reject((e.target as IDBRequest).error);
     };
   });
 }
 
-
-export async function deleteChatRoom(id: number): Promise<void> {
+export async function deleteChatRoom(id: number): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -136,8 +138,7 @@ export async function deleteChatRoom(id: number): Promise<void> {
   });
 }
 
-
-async function saveChatRoom(room: ChatRoom): Promise<number> {
+async function saveChatRoom(room: ChatRoom): Promise<unknown> {
   return new Promise(async (resolve, reject) => {
     const db = await openDB();
     const transaction = db.transaction("chatRooms", "readwrite");
@@ -153,7 +154,7 @@ async function saveChatRoom(room: ChatRoom): Promise<number> {
   });
 }
 
-async function saveMessage(message: Message): Promise<number> {
+async function saveMessage(message: Message): Promise<unknown> {
   return new Promise(async (resolve, reject) => {
     const db = await openDB();
     const transaction = db.transaction("messages", "readwrite");
@@ -170,7 +171,7 @@ async function saveMessage(message: Message): Promise<number> {
 }
 
 // 채팅방 전체 목록 불러오기 함수
-async function getAllChatRooms(): Promise<ChatRoom[]> {
+async function getAllChatRooms(): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readonly");
   const store = transaction.objectStore("chatRooms");
@@ -188,7 +189,10 @@ async function getAllChatRooms(): Promise<ChatRoom[]> {
   });
 }
 
-async function addMessage(roomId: number, message: Omit<Message, "id"> & { name: string }): Promise<number> {
+async function addMessage(
+  roomId: number,
+  message: Omit<Message, "id"> & { name: string },
+): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -206,7 +210,9 @@ async function addMessage(roomId: number, message: Omit<Message, "id"> & { name:
           timestamp: new Date(),
         };
         messages.push(newMessage);
-        room.messages = messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        room.messages = messages.sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+        );
         const putRequest = store.put(room);
         putRequest.onsuccess = (e: Event) => {
           resolve(newMessage.id);
@@ -221,7 +227,7 @@ async function addMessage(roomId: number, message: Omit<Message, "id"> & { name:
   });
 }
 
-async function getMessages(roomId: number): Promise<Message[]> {
+async function getMessages(roomId: number): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readonly");
   const store = transaction.objectStore("chatRooms");
@@ -233,7 +239,9 @@ async function getMessages(roomId: number): Promise<Message[]> {
       const room = (e.target as IDBRequest).result as ChatRoom | undefined;
       if (room) {
         const messages = room.messages || [];
-        const sortedMessages = messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        const sortedMessages = messages.sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+        );
         resolve(sortedMessages);
       } else {
         reject(new Error(`Room ${roomId} not found`));
@@ -245,5 +253,11 @@ async function getMessages(roomId: number): Promise<Message[]> {
   });
 }
 
-
-export { saveChatRoom, saveMessage, addMessage, getMessages, openDB, getAllChatRooms };
+export {
+  saveChatRoom,
+  saveMessage,
+  addMessage,
+  getMessages,
+  openDB,
+  getAllChatRooms,
+};
