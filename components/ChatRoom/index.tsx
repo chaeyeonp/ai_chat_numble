@@ -112,19 +112,7 @@ export const ChatRoom: React.FC = () => {
 
     const onSendMessage = async (text: string) => {
         try {
-            const aiResponse = await OpenAI_API(text);
-            if (aiResponse && inRoom) {
-                // 채팅방에 있을 때만 AI가 응답
-                addMessage(Number(id), {
-                    content: aiResponse,
-                    sender: "ai",
-                    image: aiUser.image,
-                    name: aiUser.name,
-                    timestamp: new Date(),
-                });
-            } else {
-                throw new Error("API error or not in room");
-            }
+            await OpenAI_API(text, room?.id ?? 0);
         } catch (error) {
             console.error("Error while sending message:", error);
             // 채팅방에서 에러 발생 시 일시 중지 및 오류 처리 로직
