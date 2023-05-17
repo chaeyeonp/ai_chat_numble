@@ -110,27 +110,55 @@ export const ChatRoom: React.FC = () => {
         setRefetch(prev => !prev);
     };
 
-    const onSendMessage = async (text: string) => {
-        try {
-            await OpenAI_API(text, room?.id ?? 0);
-        } catch (error) {
-            console.error("Error while sending message:", error);
-            // 채팅방에서 에러 발생 시 일시 중지 및 오류 처리 로직
-            // 이 경우에는 채팅방을 일시 중지하고, 다시 대화방에 들어오면 호출을 재개
-            setInRoom(false);
 
-            // 메시지를 보낸 후 refetch를 트리거
-            refetchMessages();
+    const onSendMessage = async (text: string) => {
+        if (text.length > 500) {
+            alert("Message is too long! Please limit to 500 characters.");
+            return;
         }
 
-        addMessage(Number(id), {
-            content: text,
-            sender: "user",
-            image: currentUser.image,
-            name: currentUser.name,
-            timestamp: new Date(),
-        });
+        try {
+            addMessage(Number(id), {
+                content: text,
+                sender: "user",
+                image: currentUser.image,
+                name: currentUser.name,
+                timestamp: new Date(),
+            });
+            await OpenAI_API(text, room?.id ?? 0, room?.maxMembers ?? 0);
+
+        } catch (error) {
+            console.error("Error while sending message:", error);
+            // setErrorMessage("Error while sending message. Please try again later.");
+            setInRoom(false);
+            refetchMessages();
+        } finally {
+            // setLoading(false);
+        }
     };
+
+
+    // const onSendMessage = async (text: string) => {
+    //     try {
+    //         await OpenAI_API(text, room?.id ?? 0, room?.maxMembers??0);
+    //     } catch (error) {
+    //         console.error("Error while sending message:", error);
+    //         // 채팅방에서 에러 발생 시 일시 중지 및 오류 처리 로직
+    //         // 이 경우에는 채팅방을 일시 중지하고, 다시 대화방에 들어오면 호출을 재개
+    //         setInRoom(false);
+    //
+    //         // 메시지를 보낸 후 refetch를 트리거
+    //         refetchMessages();
+    //     }
+    //
+    //     addMessage(Number(id), {
+    //         content: text,
+    //         sender: "user",
+    //         image: currentUser.image,
+    //         name: currentUser.name,
+    //         timestamp: new Date(),
+    //     });
+    // };
 
     return room ? (
         <ChatContainer>
