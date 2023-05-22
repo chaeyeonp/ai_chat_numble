@@ -41,6 +41,7 @@ const ListTable = (props: {
             <tr
               key={chatRoom.id}
               onClick={() => chatRoom.id && handleRowClick(chatRoom.id)}
+              id={chatRoom.name}
             >
               <td>{chatRoom.name}</td>
               <td>
@@ -49,6 +50,7 @@ const ListTable = (props: {
                     event.stopPropagation();
                     setEdit({ open: true, value: chatRoom });
                   }}
+                  id={"modify_button"}
                 >
                   수정
                 </ModifyButton>

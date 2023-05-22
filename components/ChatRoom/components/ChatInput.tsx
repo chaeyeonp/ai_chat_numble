@@ -91,8 +91,9 @@ export function ChatInput(props: {
         value={text}
         onChange={handleTextChange}
         onKeyDown={handleKeyDown}
+        name="chat_input"
       />
-      <SendButton onClick={handleSendClick}>
+      <SendButton onClick={handleSendClick} id={"send_button"}>
         <SendIcon />
       </SendButton>
       <ScrollToBottomButton onClick={onScrollToBottom}>

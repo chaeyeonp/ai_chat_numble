@@ -77,7 +77,7 @@ const EditChatRoomDialog = ({
           방 이름
           <Input
             type="text"
-            name="name"
+            name={"name"}
             min={2}
             max={10}
             value={state.name}
@@ -88,7 +88,7 @@ const EditChatRoomDialog = ({
           방 인원 (2-5):
           <Input
             type="number"
-            name="maxMembers"
+            name={"maxMembers"}
             min={2}
             max={5}
             value={state.maxMembers}
@@ -104,10 +104,13 @@ const EditChatRoomDialog = ({
               handleDeleteChatRoom(room.id);
             }
           }}
+          id={"edit_delete_button"}
         >
           DELETE
         </Button>
-        <Button onClick={handleUpdateRoom}>SAVE</Button>
+        <Button onClick={handleUpdateRoom} id={"edit_save_button"}>
+          SAVE
+        </Button>
       </DialogActions>
     </Dialog>
   );

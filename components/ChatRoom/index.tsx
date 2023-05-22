@@ -167,7 +167,7 @@ export const ChatRoom: React.FC = () => {
   return room ? (
     <ChatContainer>
       <ChatHeader>
-        <Button onClick={() => router.push("/chatlist")}>
+        <Button onClick={() => router.push("/chatlist")} id={"back_button"}>
           <BackIcon width={30} height={30} />
         </Button>
         <ChatTitle>{room.name}</ChatTitle>

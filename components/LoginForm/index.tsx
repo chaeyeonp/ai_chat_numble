@@ -50,11 +50,18 @@ export default function LoginForm() {
     <CenteredForm>
       <img src={"images/chat_logo.png"} alt="Chat Logo" width={100} />
       <TitleTypography>API KEY</TitleTypography>
-      <StyledInput type="text" value={apiKey} onChange={handleInputChange} />
+      <StyledInput
+        type="text"
+        value={apiKey}
+        onChange={handleInputChange}
+        name={"login_input"}
+      />
       <ErrorTypography>{error}</ErrorTypography>
 
       <ButtonContainer>
-        <Button onClick={handleSubmit}>Login</Button>
+        <Button onClick={handleSubmit} id={"login_button"}>
+          Login
+        </Button>
         <UnderlineTypography onClick={generateKey}>
           KEY 발급받는 방법
         </UnderlineTypography>

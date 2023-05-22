@@ -74,7 +74,11 @@ const ChatRooms = () => {
             <CloseIcon width={30} height={30} />
           </Button>
         ) : (
-          <Button disabled={showCreate} onClick={handleCreateRoom}>
+          <Button
+            disabled={showCreate}
+            onClick={handleCreateRoom}
+            id={"plus_button"}
+          >
             <PlusIcon width={30} height={30} />
           </Button>
         )}
@@ -89,16 +93,20 @@ const ChatRooms = () => {
               max={10}
               value={roomName}
               onChange={e => setRoomName(e.target.value)}
+              name={"room_name"}
             />
             <TitleTypography>방 인원</TitleTypography>
             <StyledInput
               type="number"
               value={maxMembers}
               onChange={e => setMaxMembers(parseInt(e.target.value))}
+              name={"room_members"}
             />
           </CenteredForm>
           <Footer>
-            <CreateRoomButton onClick={onCreate}>방 생성</CreateRoomButton>
+            <CreateRoomButton onClick={onCreate} id={"create_button"}>
+              방 생성
+            </CreateRoomButton>
           </Footer>
         </>
       ) : (
