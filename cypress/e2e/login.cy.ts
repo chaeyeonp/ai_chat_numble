@@ -5,7 +5,8 @@ describe("Login", () => {
     cy.visit("http://localhost:3000/");
     cy.get('input[name="login_input"]')
       .should("exist")
-      .type("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");
+      // TODO :https://platform.openai.com/account/api-keys 발급 받아 변경 필요
+      .type("MY_OPEN_AI_API_KEY");
 
     cy.get("#login_button").should("exist").click();
     cy.url().should("include", "chatlist");
