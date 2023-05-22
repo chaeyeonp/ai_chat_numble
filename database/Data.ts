@@ -45,7 +45,7 @@ async function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function createChatRoom(room: Omit<ChatRoom, "id">) {
+async function createChatRoom(room: Omit<ChatRoom, "id">) {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -63,7 +63,7 @@ export async function createChatRoom(room: Omit<ChatRoom, "id">) {
   });
 }
 
-export async function updateChatRoom(room: {
+async function updateChatRoom(room: {
   maxMembers: number;
   name: string;
   message: any[];
@@ -84,7 +84,7 @@ export async function updateChatRoom(room: {
   });
 }
 
-export async function getOrCreateChatRoomById(id: number): Promise<unknown> {
+async function getOrCreateChatRoomById(id: number): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -121,7 +121,7 @@ export async function getOrCreateChatRoomById(id: number): Promise<unknown> {
   });
 }
 
-export async function deleteChatRoom(id: number): Promise<unknown> {
+async function deleteChatRoom(id: number): Promise<unknown> {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
@@ -135,38 +135,6 @@ export async function deleteChatRoom(id: number): Promise<unknown> {
     request.onerror = () => {
       reject();
     };
-  });
-}
-
-async function saveChatRoom(room: ChatRoom): Promise<unknown> {
-  return new Promise(async (resolve, reject) => {
-    const db = await openDB();
-    const transaction = db.transaction("chatRooms", "readwrite");
-    const store = transaction.objectStore("chatRooms");
-
-    const request = store.add(room);
-
-    request.onsuccess = (e: Event) =>
-      resolve((e.target as IDBRequest).result as number);
-    request.onerror = (e: Event) => reject((e.target as IDBRequest).error);
-
-    db.close();
-  });
-}
-
-async function saveMessage(message: Message): Promise<unknown> {
-  return new Promise(async (resolve, reject) => {
-    const db = await openDB();
-    const transaction = db.transaction("messages", "readwrite");
-    const store = transaction.objectStore("messages");
-
-    const request = store.add(message);
-
-    request.onsuccess = (e: Event) =>
-      resolve((e.target as IDBRequest).result as number);
-    request.onerror = (e: Event) => reject((e.target as IDBRequest).error);
-
-    db.close();
   });
 }
 
@@ -227,37 +195,12 @@ async function addMessage(
   });
 }
 
-async function getMessages(roomId: number): Promise<unknown> {
-  const db = await openDB();
-  const transaction = db.transaction("chatRooms", "readonly");
-  const store = transaction.objectStore("chatRooms");
-
-  const request = store.get(roomId);
-
-  return new Promise(async (resolve, reject) => {
-    request.onsuccess = (e: Event) => {
-      const room = (e.target as IDBRequest).result as ChatRoom | undefined;
-      if (room) {
-        const messages = room.messages || [];
-        const sortedMessages = messages.sort(
-          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-        );
-        resolve(sortedMessages);
-      } else {
-        reject(new Error(`Room ${roomId} not found`));
-      }
-    };
-    request.onerror = (e: Event) => {
-      reject((e.target as IDBRequest).error);
-    };
-  });
-}
-
 export {
-  saveChatRoom,
-  saveMessage,
   addMessage,
-  getMessages,
   openDB,
   getAllChatRooms,
+  updateChatRoom,
+  createChatRoom,
+  deleteChatRoom,
+  getOrCreateChatRoomById,
 };

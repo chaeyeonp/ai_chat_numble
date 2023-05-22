@@ -32,12 +32,9 @@ export default function LoginForm() {
     if (_data.result === "success") {
       setError("");
       sessionStorage.setItem("apiKey", apiKey);
-      // handleFetchApi();
       router.push("/chatlist");
     } else {
-      console.log(_data.result);
       setError(_data.result);
-      console.log("fail");
     }
   };
 
