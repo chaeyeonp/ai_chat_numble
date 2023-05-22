@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { nicknames, profileImages } from "./utils/profileData";
 import {
-    addMessage,
-    ChatRoom as ChatRoomType,
-    getOrCreateChatRoomById,
+  addMessage,
+  ChatRoom as ChatRoomType,
+  getOrCreateChatRoomById,
 } from "../../database/Data";
 import styled from "@emotion/styled";
 import { ChatMessage } from "./components/ChatMessage";
@@ -14,14 +14,14 @@ import Button from "@mui/material/Button";
 import { OpenAI_API } from "./components/OpenAI_API";
 
 function getRandomElement(array: any[]): any {
-    return array[Math.floor(Math.random() * array.length)];
+  return array[Math.floor(Math.random() * array.length)];
 }
 
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 98vh;
-  overflow:hidden;
+  overflow: hidden;
 `;
 
 const ChatHeader = styled.div`
@@ -64,150 +64,154 @@ const RoomNotFound = styled.div`
 `;
 
 export const ChatRoom: React.FC = () => {
-    const router = useRouter();
-    const { id } = router.query;
-    const [currentUser, setCurrentUser] = useState({
-        image: "",
-        name: "",
+  const router = useRouter();
+  const { id } = router.query;
+  const [currentUser, setCurrentUser] = useState({
+    image: "",
+    name: "",
+  });
+  const [aiUser, setAIUser] = useState({
+    image: "",
+    name: "",
+  });
+  const [inRoom, setInRoom] = useState(true);
+  const [room, setRoom] = useState<ChatRoomType | undefined>();
+  const [refetch, setRefetch] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setAIUser({
+      image: getRandomElement(profileImages),
+      name: getRandomElement(nicknames),
     });
-    const [aiUser, setAIUser] = useState({
-        image: "",
-        name: "",
-    });
-    const [inRoom, setInRoom] = useState(true);
-    const [room, setRoom] = useState<ChatRoomType | undefined>();
-    const [refetch, setRefetch] = useState(false);
-    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        setAIUser({
-            image: getRandomElement(profileImages),
-            name: getRandomElement(nicknames),
-        });
+    const fetchRoom = async () => {
+      if (id) {
+        const fetchedRoom = await getOrCreateChatRoomById(
+          parseInt(id as string),
+        );
 
-        const fetchRoom = async () => {
-            if (id) {
-                const fetchedRoom = await getOrCreateChatRoomById(
-                    parseInt(id as string)
-                );
+        if (fetchedRoom) {
+          const typedFetchedRoom = fetchedRoom as ChatRoomType;
+          setRoom(typedFetchedRoom);
+          setCurrentUser({
+            image: "default_user.png",
+            name: typedFetchedRoom.name ?? "default_user",
+          });
 
-                if (fetchedRoom) {
-                    const typedFetchedRoom = fetchedRoom as ChatRoomType;
-                    setRoom(typedFetchedRoom);
-                    setCurrentUser({
-                        image: "default_user.png",
-                        name: typedFetchedRoom.name ?? "default_user",
-                    });
-
-                    setInRoom(true);
-                } else {
-                    setInRoom(false);
-                }
-            }
-        };
-
-        fetchRoom();
-
-        return () => {
-            setInRoom(false);
-        };
-    }, [id, refetch]);
-
-    useEffect(() => {
-        const container = messagesContainerRef.current;
-        if (container) {
-            container.scrollTop = container.scrollHeight;
+          setInRoom(true);
+        } else {
+          setInRoom(false);
         }
-    }, [room?.messages]);
-
-    const refetchMessages = () => {
-        setRefetch((prev) => !prev);
+      }
     };
 
-    const scrollToBottom = () => {
-        const container = messagesContainerRef.current;
-        if (container) {
-            container.scrollTop = container.scrollHeight;
+    fetchRoom();
+
+    return () => {
+      setInRoom(false);
+    };
+  }, [id, refetch]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [room?.messages]);
+
+  const refetchMessages = () => {
+    setRefetch(prev => !prev);
+  };
+
+  const scrollToBottom = () => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  const onSendMessage = async (text: string) => {
+    refetchMessages();
+
+    if (text.length > 500) {
+      alert("Message is too long! Please limit to 500 characters.");
+      return;
+    }
+
+    try {
+      addMessage(Number(id), {
+        content: text,
+        sender: "user",
+        image: currentUser.image,
+        name: currentUser.name,
+        timestamp: new Date(),
+      });
+      await OpenAI_API(text, room?.id ?? 0, room?.maxMembers ?? 0);
+      refetchMessages();
+    } catch (error) {
+      console.error("Error while sending message:", error);
+      setInRoom(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = messagesContainerRef.current;
+      if (container) {
+        // Check if the scroll is at the bottom
+        const isScrolledToBottom =
+          container.scrollHeight - container.scrollTop ===
+          container.clientHeight;
+        if (isScrolledToBottom) {
+          // Call scrollToBottom only when scrolled to the bottom
+          setTimeout(scrollToBottom, 50); // Apply a slight delay
         }
+      }
     };
 
-    const onSendMessage = async (text: string) => {
-        refetchMessages();
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
 
-        if (text.length > 500) {
-            alert("Message is too long! Please limit to 500 characters.");
-            return;
-        }
-
-        try {
-            addMessage(Number(id), {
-                content: text,
-                sender: "user",
-                image: currentUser.image,
-                name: currentUser.name,
-                timestamp: new Date(),
-            });
-            await OpenAI_API(text, room?.id ?? 0, room?.maxMembers ?? 0);
-            refetchMessages();
-        } catch (error) {
-            console.error("Error while sending message:", error);
-            setInRoom(false);
-        }
+    // Remove the event listener when the component is unmounted
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
     };
+  }, [room?.messages]);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            const container = messagesContainerRef.current;
-            if (container) {
-                // Check if the scroll is at the bottom
-                const isScrolledToBottom =
-                    container.scrollHeight - container.scrollTop === container.clientHeight;
-                if (isScrolledToBottom) {
-                    // Call scrollToBottom only when scrolled to the bottom
-                    setTimeout(scrollToBottom, 50); // Apply a slight delay
-                }
-            }
-        };
+  useEffect(() => {
+    scrollToBottom();
+  }, [room]);
 
-        const container = messagesContainerRef.current;
-        if (container) {
-            container.addEventListener("scroll", handleScroll);
-        }
-
-        // Remove the event listener when the component is unmounted
-        return () => {
-            if (container) {
-                container.removeEventListener("scroll", handleScroll);
-            }
-        };
-    }, [room?.messages]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [room]);
-
-    return room ? (
-        <ChatContainer>
-            <ChatHeader>
-                <Button onClick={() => router.push("/chatlist")}>
-                    <BackIcon width={30} height={30} />
-                </Button>
-                <ChatTitle>{room.name}</ChatTitle>
-            </ChatHeader>
-            <ChatContent ref={messagesContainerRef}>
-                {room.messages.map((message, index) => (
-                    <ChatMessage
-                        key={index}
-                        message={message}
-                        isCurrentUser={message.sender === "user"}
-                    />
-                ))}
-            </ChatContent>
-            <ChatFooter>
-                <ChatInput onSendMessage={onSendMessage} onScrollToBottom={scrollToBottom} />
-            </ChatFooter>
-        </ChatContainer>
-    ) : (
-        <RoomNotFound>Room not found</RoomNotFound>
-    );
+  return room ? (
+    <ChatContainer>
+      <ChatHeader>
+        <Button onClick={() => router.push("/chatlist")}>
+          <BackIcon width={30} height={30} />
+        </Button>
+        <ChatTitle>{room.name}</ChatTitle>
+      </ChatHeader>
+      <ChatContent ref={messagesContainerRef}>
+        {room.messages.map((message, index) => (
+          <ChatMessage
+            key={index}
+            message={message}
+            isCurrentUser={message.sender === "user"}
+          />
+        ))}
+      </ChatContent>
+      <ChatFooter>
+        <ChatInput
+          onSendMessage={onSendMessage}
+          onScrollToBottom={scrollToBottom}
+        />
+      </ChatFooter>
+    </ChatContainer>
+  ) : (
+    <RoomNotFound>Room not found</RoomNotFound>
+  );
 };

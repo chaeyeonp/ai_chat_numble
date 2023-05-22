@@ -4,34 +4,44 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import { ChatRoom, deleteChatRoom, updateChatRoom } from "../../../../database/Data";
-import { Input, Label, StyledDialogTitle } from "../../../../styles/ChatList.styles";
+import {
+  ChatRoom,
+  deleteChatRoom,
+  updateChatRoom,
+} from "../../../../database/Data";
+import {
+  Input,
+  Label,
+  StyledDialogTitle,
+} from "../../../../styles/ChatList.styles";
 import CloseIcon from "../../../../public/icons/CloseIcon";
 import { Typography } from "@mui/material";
 
 const EditChatRoomDialog = ({
-                              onClose = () => {
-                              },
-                              changeData = () => {
-                              },
-                              room,
-                            }: { onClose: () => void; changeData: () => void; room?: ChatRoom | undefined }) => {
+  onClose = () => {},
+  changeData = () => {},
+  room,
+}: {
+  onClose: () => void;
+  changeData: () => void;
+  room?: ChatRoom | undefined;
+}) => {
   const [state, setState] = useState({
     name: room?.name || "",
     maxMembers: room?.maxMembers || 2,
-    message:[]
+    message: [],
   });
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState({
       ...state,
-      [e.target.name]: e.target.type === "number" ? parseInt(e.target.value) : e.target.value,
+      [e.target.name]:
+        e.target.type === "number" ? parseInt(e.target.value) : e.target.value,
     });
   };
 
   const handleUpdateRoom = async () => {
-    const updatedRoom = { ...room, ...state, };
+    const updatedRoom = { ...room, ...state };
     try {
       await updateChatRoom(updatedRoom);
       changeData();
@@ -40,7 +50,6 @@ const EditChatRoomDialog = ({
       console.error(`Error updating room with ID ${room?.id}:`, error);
     }
   };
-
 
   const handleDeleteChatRoom = async (id: number) => {
     await deleteChatRoom(id);
@@ -54,8 +63,10 @@ const EditChatRoomDialog = ({
     <Dialog open={true} onClose={onClose}>
       <StyledDialogTitle>
         <Typography>Edit Page</Typography>
-        <Button onClick={onClose}><CloseIcon width={40} height={40} />
-        </Button></StyledDialogTitle>
+        <Button onClick={onClose}>
+          <CloseIcon width={40} height={40} />
+        </Button>
+      </StyledDialogTitle>
       <DialogContent>
         <Label>
           방 이름
@@ -81,13 +92,15 @@ const EditChatRoomDialog = ({
         </Label>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => {
-          if(room.id){
-            handleDeleteChatRoom(room.id);
-
-          }
-        }
-        }>Delete</Button>
+        <Button
+          onClick={() => {
+            if (room.id) {
+              handleDeleteChatRoom(room.id);
+            }
+          }}
+        >
+          Delete
+        </Button>
         <Button onClick={handleUpdateRoom}>Edit</Button>
       </DialogActions>
     </Dialog>

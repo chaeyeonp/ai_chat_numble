@@ -31,7 +31,7 @@ const CurrentUserMessageContainer = styled(MessageContainer)`
   flex-direction: row-reverse;
 `;
 
-export function ChatMessage(props: { message: any, isCurrentUser: any }) {
+export function ChatMessage(props: { message: any; isCurrentUser: any }) {
   const { message, isCurrentUser } = props;
   const formatTimestamp = (timestamp: any) => {
     const hours = timestamp.getHours();
@@ -39,11 +39,16 @@ export function ChatMessage(props: { message: any, isCurrentUser: any }) {
     return `${hours}:${minutes}`;
   };
 
-  const Container = isCurrentUser ? CurrentUserMessageContainer : MessageContainer;
+  const Container = isCurrentUser
+    ? CurrentUserMessageContainer
+    : MessageContainer;
 
   return (
     <Container>
-      <ProfileImage src={`/images/profile/${message.image}`} alt={message.name} />
+      <ProfileImage
+        src={`/images/profile/${message.image}`}
+        alt={message.name}
+      />
       <div className="message-info">
         <Sender>{message.name}</Sender>
         <Text>{message.content}</Text>

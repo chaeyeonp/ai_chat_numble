@@ -150,7 +150,6 @@ export const Input = styled.input`
   box-sizing: border-box;
 `;
 
-
 export const StyledDialogTitle = styled.div`
   display: flex;
   justify-content: space-between;

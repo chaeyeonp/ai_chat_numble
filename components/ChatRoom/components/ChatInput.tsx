@@ -11,7 +11,6 @@ const InputContainer = styled.div`
   left: 0;
   width: 75%;
   padding: 1rem;
-
 `;
 
 const Input = styled.input`
@@ -59,42 +58,46 @@ const ScrollToBottomButton = styled.button`
   cursor: pointer;
 `;
 
+export function ChatInput(props: {
+  onSendMessage: any;
+  onScrollToBottom: any;
+}) {
+  const { onSendMessage, onScrollToBottom } = props;
 
-export function ChatInput(props: { onSendMessage: any, onScrollToBottom: any }) {
-    const {onSendMessage, onScrollToBottom} = props;
+  const [text, setText] = React.useState("");
 
+  const handleTextChange = (event: any) => {
+    setText(event.target.value);
+  };
 
-    const [text, setText] = React.useState("");
+  const handleSendClick = () => {
+    if (text.trim()) {
+      onSendMessage(text);
+      setText("");
+    }
+  };
 
-    const handleTextChange = (event: any) => {
-        setText(event.target.value);
-    };
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      handleSendClick();
+    }
+  };
 
-    const handleSendClick = () => {
-        if (text.trim()) {
-            onSendMessage(text);
-            setText("");
-        }
-    };
-
-    const handleKeyDown = (event: any) => {
-        if (event.key === "Enter") {
-            handleSendClick();
-        }
-    };
-
-    return (
-        <InputContainer>
-            <Input
-                type="text"
-                placeholder="메시지를 입력하세요"
-                value={text}
-                onChange={handleTextChange}
-                onKeyDown={handleKeyDown}
-            />
-            <SendButton onClick={handleSendClick}><SendIcon/></SendButton>
-            <ScrollToBottomButton onClick={onScrollToBottom}><ArrowIcon width={30} height={30}/></ScrollToBottomButton>
-
-        </InputContainer>
-    );
+  return (
+    <InputContainer>
+      <Input
+        type="text"
+        placeholder="메시지를 입력하세요"
+        value={text}
+        onChange={handleTextChange}
+        onKeyDown={handleKeyDown}
+      />
+      <SendButton onClick={handleSendClick}>
+        <SendIcon />
+      </SendButton>
+      <ScrollToBottomButton onClick={onScrollToBottom}>
+        <ArrowIcon width={30} height={30} />
+      </ScrollToBottomButton>
+    </InputContainer>
+  );
 }
