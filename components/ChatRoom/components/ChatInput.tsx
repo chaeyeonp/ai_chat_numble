@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "@emotion/styled";
+import SendIcon from "../../../public/icons/SendIcon";
+import ArrowIcon from "../../../public/icons/ArrowIcon";
 
 const InputContainer = styled.div`
   display: flex;
@@ -7,8 +9,9 @@ const InputContainer = styled.div`
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 90%;
+  width: 75%;
   padding: 1rem;
+
 `;
 
 const Input = styled.input`
@@ -29,7 +32,7 @@ const Input = styled.input`
 const SendButton = styled.button`
   background-color: #3a90f2;
   color: #fff;
-  padding:1rem;
+  padding: 0.7rem;
   border: none;
   border-radius: 0.25rem;
   font-size: 1rem;
@@ -45,37 +48,53 @@ const SendButton = styled.button`
     box-shadow: 0 0 0 3px #3a90f2;
   }
 `;
+const ScrollToBottomButton = styled.button`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+`;
 
-export function ChatInput(props: { onSendMessage: any }) {
-  const [text, setText] = React.useState("");
 
-  const handleTextChange = (event: any) => {
-    setText(event.target.value);
-  };
+export function ChatInput(props: { onSendMessage: any, onScrollToBottom: any }) {
+    const {onSendMessage, onScrollToBottom} = props;
 
-  const handleSendClick = () => {
-    if (text.trim()) {
-      props.onSendMessage(text);
-      setText("");
-    }
-  };
 
-  const handleKeyDown = (event: any) => {
-    if (event.key === "Enter") {
-      handleSendClick();
-    }
-  };
+    const [text, setText] = React.useState("");
 
-  return (
-    <InputContainer>
-      <Input
-        type="text"
-        placeholder="메시지를 입력하세요..."
-        value={text}
-        onChange={handleTextChange}
-        onKeyDown={handleKeyDown}
-      />
-      <SendButton onClick={handleSendClick}>보내기</SendButton>
-    </InputContainer>
-  );
+    const handleTextChange = (event: any) => {
+        setText(event.target.value);
+    };
+
+    const handleSendClick = () => {
+        if (text.trim()) {
+            onSendMessage(text);
+            setText("");
+        }
+    };
+
+    const handleKeyDown = (event: any) => {
+        if (event.key === "Enter") {
+            handleSendClick();
+        }
+    };
+
+    return (
+        <InputContainer>
+            <Input
+                type="text"
+                placeholder="메시지를 입력하세요"
+                value={text}
+                onChange={handleTextChange}
+                onKeyDown={handleKeyDown}
+            />
+            <SendButton onClick={handleSendClick}><SendIcon/></SendButton>
+            <ScrollToBottomButton onClick={onScrollToBottom}><ArrowIcon width={30} height={30}/></ScrollToBottomButton>
+
+        </InputContainer>
+    );
 }

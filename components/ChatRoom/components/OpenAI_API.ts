@@ -65,29 +65,6 @@ export async function OpenAI_API(prompt: any, roomId: number, maxMembers: number
                 console.log(error);
             });
         }
-
-
-        // for (let index of data.choices.keys()) {
-        //     const aiResponse = data.choices[index].message.content;
-        //
-        //     // AI의 응답을 채팅 메시지로 데이터베이스에 추가합니다.
-        //     await addMessage(roomId, {
-        //         content: aiResponse,
-        //         sender: "ai",
-        //         // image: `profile_${index + 1}.png`, // 랜덤 프로필 이미지
-        //         image: selectedProfileImage,
-        //         // name: `User${Math.floor(Math.random() * 4) + 1}`, // 랜덤 사용자 이름
-        //         name: selectedNickname,
-        //         timestamp: new Date(), // 현재 시간
-        //     }).then(messageId => {
-        //         // 메시지가 성공적으로 저장되었다면, 메시지 ID를 콘솔에 출력합니다.
-        //         console.log(`Message saved with ID: ${messageId}, AI Response: ${aiResponse}`);
-        //     }).catch(error => {
-        //         // 메시지 저장에 실패한 경우, 에러를 콘솔에 출력합니다.
-        //         console.error(`Failed to save message: ${error}`);
-        //     });
-        // }
-
     } else {
         // 응답이 실패하면, 에러를 발생시킵니다.
         throw new Error("API request failed");

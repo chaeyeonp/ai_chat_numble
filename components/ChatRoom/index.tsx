@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {nicknames, profileImages} from "./utils/profileData";
 import {
     addMessage,
@@ -20,9 +20,27 @@ function getRandomElement(array: any[]): any {
 const ChatHeader = styled.div`
   display: flex;
   align-items: center;
-  //background-color: #212121;
-  height: 80px;
+  height: 70px;
   padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1;
+`;
+
+const ChatFooter = styled.div`
+  display: flex;
+  align-items: center;
+  height: 70px;
+  padding: 0 20px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1;
 `;
 
 const ChatTitle = styled.h2`
@@ -32,12 +50,12 @@ const ChatTitle = styled.h2`
   margin-left: 16px;
 `;
 
-const ChatContainer = styled.div`
+const ChatContent = styled.div`
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 140px);
+  margin: 70px 0; /* 헤더의 높이만큼 컨테이너를 아래로 이동 */
 `;
 
 const MessagesContainer = styled.div`
@@ -67,9 +85,10 @@ export const ChatRoom: React.FC = () => {
         image: "",
         name: "",
     });
-    const [inRoom, setInRoom] = useState(true); // 채팅방에 있는지 여부를 저장하는 상태 변수
+    const [inRoom, setInRoom] = useState(true);
     const [room, setRoom] = useState<ChatRoomType | undefined>();
     const [refetch, setRefetch] = useState(false);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setAIUser({
@@ -80,7 +99,7 @@ export const ChatRoom: React.FC = () => {
         const fetchRoom = async () => {
             if (id) {
                 const fetchedRoom = await getOrCreateChatRoomById(
-                    parseInt(id as string),
+                    parseInt(id as string)
                 );
 
                 if (fetchedRoom) {
@@ -101,13 +120,35 @@ export const ChatRoom: React.FC = () => {
         fetchRoom();
 
         return () => {
-            // 채팅방에서 나갈 때 필요한 작업 수행
             setInRoom(false);
         };
     }, [id, refetch]);
 
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }, [room?.messages]);
+
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }, []);
+
     const refetchMessages = () => {
-        setRefetch(prev => !prev);
+        setRefetch((prev) => !prev);
+    };
+
+    const scrollToBottom = () => {
+        const container = messagesContainerRef.current;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+            console.log("scrollTop", container.scrollTop, "scrollHeight", container.scrollHeight);
+
+        }
     };
 
 
@@ -131,33 +172,67 @@ export const ChatRoom: React.FC = () => {
             refetchMessages();
         } catch (error) {
             console.error("Error while sending message:", error);
-            // setErrorMessage("Error while sending message. Please try again later.");
             setInRoom(false);
-        } finally {
-            // setLoading(false);
         }
     };
 
+    useEffect(() => {
+        const handleScroll = () => {
+            const container = messagesContainerRef.current;
+            if (container) {
+                // 스크롤이 맨 아래로 도달했는지 확인
+                const isScrolledToBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+                if (isScrolledToBottom) {
+                    // 맨 아래에 도달했을 때만 scrollToBottom 호출
+                    setTimeout(scrollToBottom, 50); // 약간의 딜레이 적용
+                }
+            }
+        };
+
+        const container = messagesContainerRef.current;
+        if (container) {
+            container.addEventListener("scroll", handleScroll);
+        }
+
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        return () => {
+            if (container) {
+                container.removeEventListener("scroll", handleScroll);
+            }
+        };
+    }, [room?.messages]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [room]);
+
+
     return room ? (
-        <ChatContainer>
+        <>
             <ChatHeader>
-                {/*<img src="icon.png" alt="icon" />*/}
                 <Button onClick={() => router.push("/chatlist")}>
                     <BackIcon width={30} height={30}/>
                 </Button>
                 <ChatTitle>{room.name}</ChatTitle>
             </ChatHeader>
-            <MessagesContainer>
-                {room.messages.map((message, index) => (
-                    <ChatMessage
-                        key={index}
-                        message={message}
-                        isCurrentUser={message.sender === "user"}
-                    />
-                ))}
-            </MessagesContainer>
-            <ChatInput onSendMessage={onSendMessage}/>
-        </ChatContainer>
+            <ChatContent>
+                <MessagesContainer ref={messagesContainerRef}>
+                    {room.messages.map((message, index) => (
+                        <ChatMessage
+                            key={index}
+                            message={message}
+                            isCurrentUser={message.sender === "user"}
+                        />
+                    ))}
+                </MessagesContainer>
+            </ChatContent>
+            <ChatFooter>
+                <ChatInput onSendMessage={onSendMessage} onScrollToBottom={scrollToBottom}/>
+            </ChatFooter>
+
+
+        </>
+
     ) : (
         <RoomNotFound>Room not found</RoomNotFound>
     );
