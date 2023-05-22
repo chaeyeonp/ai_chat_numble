@@ -1,5 +1,4 @@
-// components/EditChatRoomDialog.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -42,6 +41,12 @@ const EditChatRoomDialog = ({
 
   const handleUpdateRoom = async () => {
     const updatedRoom = { ...room, ...state };
+
+    if (updatedRoom.maxMembers < 2 || updatedRoom.maxMembers > 5) {
+      alert("방 인원은 2명에서 5명 사이여야 합니다.");
+      return;
+    }
+
     try {
       await updateChatRoom(updatedRoom);
       changeData();
@@ -64,7 +69,7 @@ const EditChatRoomDialog = ({
       <StyledDialogTitle>
         <Typography>Edit Page</Typography>
         <Button onClick={onClose}>
-          <CloseIcon width={40} height={40} />
+          <CloseIcon width={30} height={30} />
         </Button>
       </StyledDialogTitle>
       <DialogContent>
@@ -93,15 +98,16 @@ const EditChatRoomDialog = ({
       </DialogContent>
       <DialogActions>
         <Button
+          color="error"
           onClick={() => {
             if (room.id) {
               handleDeleteChatRoom(room.id);
             }
           }}
         >
-          Delete
+          DELETE
         </Button>
-        <Button onClick={handleUpdateRoom}>Edit</Button>
+        <Button onClick={handleUpdateRoom}>SAVE</Button>
       </DialogActions>
     </Dialog>
   );

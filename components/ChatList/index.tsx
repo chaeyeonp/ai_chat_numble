@@ -80,32 +80,32 @@ const ChatRooms = () => {
         )}
       </Header>
       {showCreate ? (
-        <CenteredForm>
-          <TitleTypography>방 이름</TitleTypography>
-          <StyledInput
-            type="text"
-            min={2}
-            max={10}
-            value={roomName}
-            onChange={e => setRoomName(e.target.value)}
-          />
-          <TitleTypography>방 인원</TitleTypography>
-          <StyledInput
-            type="number"
-            min={2}
-            max={5}
-            value={maxMembers}
-            onChange={e => setMaxMembers(parseInt(e.target.value))}
-          />
-        </CenteredForm>
+        <>
+          <CenteredForm>
+            <TitleTypography>방 이름</TitleTypography>
+            <StyledInput
+              type="text"
+              min={2}
+              max={10}
+              value={roomName}
+              onChange={e => setRoomName(e.target.value)}
+            />
+            <TitleTypography>방 인원</TitleTypography>
+            <StyledInput
+              type="number"
+              value={maxMembers}
+              onChange={e => setMaxMembers(parseInt(e.target.value))}
+            />
+          </CenteredForm>
+          <Footer>
+            <CreateRoomButton onClick={onCreate}>방 생성</CreateRoomButton>
+          </Footer>
+        </>
       ) : (
         <Content>
           <ListTable chatRooms={chatRooms} changeData={changeData} />
         </Content>
       )}
-      <Footer>
-        <CreateRoomButton onClick={onCreate}>방 생성</CreateRoomButton>
-      </Footer>
     </Container>
   );
 };

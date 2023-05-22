@@ -6,7 +6,6 @@ const ButtonContainer = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-
   position: absolute;
   bottom: 0;
 `;
@@ -29,15 +28,6 @@ const Button = styled.button`
     background-color: #1e90ff;
     opacity: 0.8;
   }
-`;
-
-const CenteredContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #000000;
-  margin: 0;
 `;
 
 const CenteredForm = styled.form`
@@ -104,7 +94,6 @@ const UnderlineTypography = styled.span`
 export {
   ButtonContainer,
   Button,
-  CenteredContainer,
   CenteredForm,
   StyledInput,
   TitleTypography,
