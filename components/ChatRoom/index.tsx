@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { nicknames, profileImages } from "./utils/profileData";
 import {
   addMessage,
   ChatRoom as ChatRoomType,
@@ -12,10 +11,6 @@ import { useRouter } from "next/router";
 import { BackIcon } from "../../public/icons";
 import Button from "@mui/material/Button";
 import { OpenAI_API } from "./components/OpenAI_API";
-
-function getRandomElement(array: any[]): any {
-  return array[Math.floor(Math.random() * array.length)];
-}
 
 const ChatContainer = styled.div`
   display: flex;
@@ -41,10 +36,9 @@ const ChatFooter = styled.div`
 `;
 
 const ChatTitle = styled.h2`
-  margin: 0;
   color: white;
   font-size: 24px;
-  margin-left: 16px;
+  margin: 0 0 0 16px;
 `;
 
 const ChatContent = styled.div`
@@ -70,21 +64,11 @@ export const ChatRoom: React.FC = () => {
     image: "",
     name: "",
   });
-  const [aiUser, setAIUser] = useState({
-    image: "",
-    name: "",
-  });
-  const [inRoom, setInRoom] = useState(true);
   const [room, setRoom] = useState<ChatRoomType | undefined>();
   const [refetch, setRefetch] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setAIUser({
-      image: getRandomElement(profileImages),
-      name: getRandomElement(nicknames),
-    });
-
     const fetchRoom = async () => {
       if (id) {
         const fetchedRoom = await getOrCreateChatRoomById(
@@ -98,19 +82,13 @@ export const ChatRoom: React.FC = () => {
             image: "default_user.png",
             name: typedFetchedRoom.name ?? "default_user",
           });
-
-          setInRoom(true);
-        } else {
-          setInRoom(false);
         }
       }
     };
 
     fetchRoom();
 
-    return () => {
-      setInRoom(false);
-    };
+    return () => {};
   }, [id, refetch]);
 
   useEffect(() => {
@@ -151,7 +129,6 @@ export const ChatRoom: React.FC = () => {
       refetchMessages();
     } catch (error) {
       console.error("Error while sending message:", error);
-      setInRoom(false);
     }
   };
 
