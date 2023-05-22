@@ -1,33 +1,35 @@
-import React, {useState, useEffect, useRef} from "react";
-import {nicknames, profileImages} from "./utils/profileData";
+import React, { useState, useEffect, useRef } from "react";
+import { nicknames, profileImages } from "./utils/profileData";
 import {
     addMessage,
     ChatRoom as ChatRoomType,
     getOrCreateChatRoomById,
 } from "../../database/Data";
 import styled from "@emotion/styled";
-import {ChatMessage} from "./components/ChatMessage";
-import {ChatInput} from "./components/ChatInput";
-import {useRouter} from "next/router";
-import {BackIcon} from "../../public/icons";
+import { ChatMessage } from "./components/ChatMessage";
+import { ChatInput } from "./components/ChatInput";
+import { useRouter } from "next/router";
+import { BackIcon } from "../../public/icons";
 import Button from "@mui/material/Button";
-import {OpenAI_API} from "./components/OpenAI_API";
+import { OpenAI_API } from "./components/OpenAI_API";
 
 function getRandomElement(array: any[]): any {
     return array[Math.floor(Math.random() * array.length)];
 }
+
+const ChatContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 98vh;
+  overflow:hidden;
+`;
 
 const ChatHeader = styled.div`
   display: flex;
   align-items: center;
   height: 70px;
   padding: 0 20px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   background-color: rgba(0, 0, 0, 0.8);
-  z-index: 1;
 `;
 
 const ChatFooter = styled.div`
@@ -35,12 +37,7 @@ const ChatFooter = styled.div`
   align-items: center;
   height: 70px;
   padding: 0 20px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background-color: rgba(0, 0, 0, 0.8);
-  z-index: 1;
 `;
 
 const ChatTitle = styled.h2`
@@ -52,18 +49,10 @@ const ChatTitle = styled.h2`
 
 const ChatContent = styled.div`
   color: white;
-  display: flex;
-  flex-direction: column;
-  height: calc(100% - 140px);
-  margin: 70px 0; /* 헤더의 높이만큼 컨테이너를 아래로 이동 */
-`;
-
-const MessagesContainer = styled.div`
-  display: flex;
-  flex-direction: column;
+  flex-grow: 1;
   overflow-y: auto;
   padding: 1rem;
-  flex-grow: 1;
+  height: calc(100% - 140px);
 `;
 
 const RoomNotFound = styled.div`
@@ -76,7 +65,7 @@ const RoomNotFound = styled.div`
 
 export const ChatRoom: React.FC = () => {
     const router = useRouter();
-    const {id} = router.query;
+    const { id } = router.query;
     const [currentUser, setCurrentUser] = useState({
         image: "",
         name: "",
@@ -131,13 +120,6 @@ export const ChatRoom: React.FC = () => {
         }
     }, [room?.messages]);
 
-    useEffect(() => {
-        const container = messagesContainerRef.current;
-        if (container) {
-            container.scrollTop = container.scrollHeight;
-        }
-    }, []);
-
     const refetchMessages = () => {
         setRefetch((prev) => !prev);
     };
@@ -146,11 +128,8 @@ export const ChatRoom: React.FC = () => {
         const container = messagesContainerRef.current;
         if (container) {
             container.scrollTop = container.scrollHeight;
-            console.log("scrollTop", container.scrollTop, "scrollHeight", container.scrollHeight);
-
         }
     };
-
 
     const onSendMessage = async (text: string) => {
         refetchMessages();
@@ -180,11 +159,12 @@ export const ChatRoom: React.FC = () => {
         const handleScroll = () => {
             const container = messagesContainerRef.current;
             if (container) {
-                // 스크롤이 맨 아래로 도달했는지 확인
-                const isScrolledToBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+                // Check if the scroll is at the bottom
+                const isScrolledToBottom =
+                    container.scrollHeight - container.scrollTop === container.clientHeight;
                 if (isScrolledToBottom) {
-                    // 맨 아래에 도달했을 때만 scrollToBottom 호출
-                    setTimeout(scrollToBottom, 50); // 약간의 딜레이 적용
+                    // Call scrollToBottom only when scrolled to the bottom
+                    setTimeout(scrollToBottom, 50); // Apply a slight delay
                 }
             }
         };
@@ -194,7 +174,7 @@ export const ChatRoom: React.FC = () => {
             container.addEventListener("scroll", handleScroll);
         }
 
-        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        // Remove the event listener when the component is unmounted
         return () => {
             if (container) {
                 container.removeEventListener("scroll", handleScroll);
@@ -206,33 +186,27 @@ export const ChatRoom: React.FC = () => {
         scrollToBottom();
     }, [room]);
 
-
     return room ? (
-        <>
+        <ChatContainer>
             <ChatHeader>
                 <Button onClick={() => router.push("/chatlist")}>
-                    <BackIcon width={30} height={30}/>
+                    <BackIcon width={30} height={30} />
                 </Button>
                 <ChatTitle>{room.name}</ChatTitle>
             </ChatHeader>
-            <ChatContent>
-                <MessagesContainer ref={messagesContainerRef}>
-                    {room.messages.map((message, index) => (
-                        <ChatMessage
-                            key={index}
-                            message={message}
-                            isCurrentUser={message.sender === "user"}
-                        />
-                    ))}
-                </MessagesContainer>
+            <ChatContent ref={messagesContainerRef}>
+                {room.messages.map((message, index) => (
+                    <ChatMessage
+                        key={index}
+                        message={message}
+                        isCurrentUser={message.sender === "user"}
+                    />
+                ))}
             </ChatContent>
             <ChatFooter>
-                <ChatInput onSendMessage={onSendMessage} onScrollToBottom={scrollToBottom}/>
+                <ChatInput onSendMessage={onSendMessage} onScrollToBottom={scrollToBottom} />
             </ChatFooter>
-
-
-        </>
-
+        </ChatContainer>
     ) : (
         <RoomNotFound>Room not found</RoomNotFound>
     );
