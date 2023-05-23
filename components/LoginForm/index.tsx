@@ -19,12 +19,14 @@ export default function LoginForm() {
   // 폼 제출 처리 함수
   const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    const currentOrigin = window.location.origin; // 현재 도메인 가져오기
 
     // API 키 검증을 위해 서버로 POST 요청 전송
     const _result = await fetch("/api/key", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Origin: currentOrigin, // 현재 도메인으로 설정
       },
       body: JSON.stringify({
         apiKey: apiKey,
