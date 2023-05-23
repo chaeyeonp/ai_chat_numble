@@ -2,46 +2,44 @@ const dbName = "chatDB";
 const dbVersion = 1;
 
 export interface ChatRoom {
-  id?: number;
-  name: string;
-  maxMembers: number;
-  createdAt?: Date;
-  messages: Message[];
+  id?: number; // 채팅방의 고유 ID
+  name: string; // 채팅방 이름
+  maxMembers: number; // 최대 참여 멤버 수
+  createdAt?: Date; // 채팅방 생성 시간
+  messages: Message[]; // 채팅 메시지 목록
 }
 
 export interface Message {
-  id?: number;
-  sender: string;
-  content: string;
-  timestamp: Date;
-  image: string;
+  id?: number; // 메시지의 고유 ID
+  sender: string; // 발신자
+  content: string; // 메시지 내용
+  timestamp: Date; // 메시지 전송 시간
+  image: string; // 이미지 URL
 }
 
+// 객체 스토어에 접근할 수 있는 IDBDatabase 객체를 반환하는 함수 (데이터를 읽고 쓸 수 있게 함)
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, dbVersion);
 
     request.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+      // 데이터베이스 스키마를 업그레이드할 때 실행되는 콜백 함수
       const db = (e.target as IDBOpenDBRequest).result;
 
+      // "chatRooms"라는 객체 저장소 생성
       const ChatRooms = db.createObjectStore("chatRooms", {
-        keyPath: "id",
+        keyPath: "id", // ID를 기본 키로 사용
       });
 
+      // "id"와 "name" 필드를 기준으로 인덱스 생성
       ChatRooms.createIndex("id", "id", { unique: true });
       ChatRooms.createIndex("name", "name", { unique: false });
-
-      const Messages = db.createObjectStore("messages", {
-        keyPath: "id",
-      });
-      Messages.createIndex("id", "id", { unique: true });
-      Messages.createIndex("roomId", "roomId", { unique: false });
     };
 
     request.onsuccess = (e: Event) =>
-      resolve((e.target as IDBOpenDBRequest).result);
+      resolve((e.target as IDBOpenDBRequest).result); // 데이터베이스 열기 성공 시 해결(resolve)
     request.onerror = (e: Event) =>
-      reject((e.target as IDBOpenDBRequest).error);
+      reject((e.target as IDBOpenDBRequest).error); // 데이터베이스 열기 실패 시 거부(reject)
   });
 }
 
@@ -49,8 +47,8 @@ async function createChatRoom(room: Omit<ChatRoom, "id">) {
   const db = await openDB();
   const transaction = db.transaction("chatRooms", "readwrite");
   const store = transaction.objectStore("chatRooms");
-
-  const request = store.add({ ...room, id: Date.now() });
+  // TODO : uuid
+  const request = store.add({ ...room });
 
   return new Promise((resolve, reject) => {
     request.onsuccess = (e: Event) => {

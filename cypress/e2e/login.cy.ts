@@ -6,7 +6,7 @@ describe("Login", () => {
     cy.get('input[name="login_input"]')
       .should("exist")
       // TODO :https://platform.openai.com/account/api-keys 발급 받아 변경 필요
-      .type("MY_OPEN_AI_API_KEY");
+      .type("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");
 
     cy.get("#login_button").should("exist").click();
     cy.url().should("include", "chatlist");
@@ -19,8 +19,8 @@ describe("Login", () => {
 
     cy.get("#test_room").should("exist").click();
     cy.get('input[name="chat_input"]').should("exist").type("What is cypress?");
-    //
     cy.get("#back_button").should("exist").click();
+
     cy.get("#modify_button").should("exist").click();
     cy.get("#edit_delete_button").should("exist").click();
 
