@@ -17,9 +17,6 @@ export interface Message {
   image: string; // 이미지 URL
 }
 
-// 1. 데이터 베이스를 연다 (openDB)
-// 2. 객체 저장소에 대한 쓰기 트랜잭션 시작
-
 // 객체 스토어에 접근할 수 있는 IDBDatabase 객체를 반환하는 함수 (데이터를 읽고 쓸 수 있게 함)
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -31,12 +28,12 @@ async function openDB(): Promise<IDBDatabase> {
 
       // "chatRooms"라는 객체 저장소 생성
       const ChatRooms = db.createObjectStore("chatRooms", {
-        // ID를 기본 키로 사용
-        keyPath: "id",
+        keyPath: "id", // ID를 기본 키로 사용
       });
 
       // "id"와 "name" 필드를 기준으로 인덱스 생성
       ChatRooms.createIndex("id", "id", { unique: true });
+      ChatRooms.createIndex("name", "name", { unique: false });
     };
 
     request.onsuccess = (e: Event) =>
@@ -47,25 +44,16 @@ async function openDB(): Promise<IDBDatabase> {
 }
 
 async function createChatRoom(room: Omit<ChatRoom, "id">) {
-  // 데이터 베이스 열기
   const db = await openDB();
-
-  // "chatRooms" 객체 저장소에 대한 쓰기 트랜잭션 시작
   const transaction = db.transaction("chatRooms", "readwrite");
-
-  // // "chatRooms" 객체 저장소 가져오기
   const store = transaction.objectStore("chatRooms");
-
-  // 채팅방 객체(room)를 저장소에 추가하는 요청
   const request = store.add({ ...room });
 
-  // 채팅방 추가 성공 시 결과값 반환
   return new Promise((resolve, reject) => {
     request.onsuccess = (e: Event) => {
       resolve((e.target as IDBRequest).result);
     };
 
-    // 채팅방 추가 실패 시 에러 반환
     request.onerror = (e: Event) => {
       reject((e.target as IDBRequest).error);
     };
@@ -77,74 +65,55 @@ async function updateChatRoom(room: {
   name: string;
   message: any[];
 }): Promise<unknown> {
-  // 데이터베이스 열기
   const db = await openDB();
-
-  // "chatRooms" 객체 저장소에 대한 쓰기 트랜잭션 시작
   const transaction = db.transaction("chatRooms", "readwrite");
-
-  // "chatRooms" 객체 저장소 가져오기
   const store = transaction.objectStore("chatRooms");
 
-  // 주어진 room 객체를 저장소에 업데이트하는 요청
   const request = store.put(room);
 
   return new Promise((resolve, reject) => {
     request.onsuccess = () => {
-      // 업데이트 성공 시 결과값 없이 해결(resolve)
       resolve(null);
     };
     request.onerror = () => {
-      // 업데이트 실패 시 에러 없이 거부(reject)
       reject(null);
     };
   });
 }
 
 async function getOrCreateChatRoomById(id: number): Promise<unknown> {
-  // 데이터베이스 열기
   const db = await openDB();
-
-  // "chatRooms" 객체 저장소에 대한 쓰기 트랜잭션 시작
   const transaction = db.transaction("chatRooms", "readwrite");
-
-  // "chatRooms" 객체 저장소 가져오기
   const store = transaction.objectStore("chatRooms");
-
-  // 주어진 id에 해당하는 채팅방 가져오기
   const request = store.get(id);
 
   return new Promise((resolve, reject) => {
     request.onsuccess = (e: Event) => {
-      // 요청 결과 가져오기
       const result = (e.target as IDBRequest).result;
       if (result) {
         if (!result.messages) {
-          // 가져온 채팅방에 메시지 배열이 없으면 빈 배열로 초기화
           result.messages = [];
         }
-
-        // 가져온 채팅방 객체를 해결(resolve)
         resolve(result);
       } else {
         const newRoom: ChatRoom = {
           name: "My New Room",
           maxMembers: 100,
           createdAt: new Date(),
-          messages: [], // 새로운 채팅방 객체 생성
+          messages: [],
         };
-        const addRequest = store.add(newRoom); // 새로운 채팅방을 저장소에 추가하는 요청
+        const addRequest = store.add(newRoom);
         addRequest.onsuccess = () => {
-          resolve(newRoom); // 새로운 채팅방 객체를 해결(resolve)
+          resolve(newRoom);
         };
         addRequest.onerror = e => {
-          reject((e.target as IDBRequest).error); // 저장소 추가 요청 실패 시 에러를 거부(reject)
+          reject((e.target as IDBRequest).error);
         };
       }
     };
 
     request.onerror = e => {
-      reject((e.target as IDBRequest).error); // 채팅방 가져오기 요청 실패 시 에러를 거부(reject)
+      reject((e.target as IDBRequest).error);
     };
   });
 }
